@@ -5,11 +5,14 @@ import java.io.{PrintWriter, FileWriter, File}
 import scala.io.Source
 
 object Main extends App {
+  case class Transaction(amount: Double, description: String)
+
   val actions = Map(
     "add" -> add _,
     "create" -> create _,
     "balance" -> balance _,
-    "balances" -> balances _
+    "balances" -> balances _,
+    "transactions" -> transactions _
   )
 
   actions(args.head)(args.drop(1))
@@ -49,17 +52,29 @@ object Main extends App {
     writer.close()
   }
 
+  def transactions(args: Array[String]): Unit = {
+    val target = args.head
+    val limit = if(args.length > 1) args(1).toInt else 10
+
+    val transactions = getTransactions(target).take(limit)
+
+    println(s"Transactions for $target")
+    transactions.foreach(t => println(s"${t.amount} - ${t.description}"))
+  }
+
   def calculateBalance(target: String) = {
-    case class Transaction(amount: Double, description: String)
+    val transactions = getTransactions(target)
+    transactions.foldLeft(0.0){case(sum, transaction) => sum + transaction.amount}
+  }
+
+  def getTransactions(target: String) = {
 
     val balanceFile = new File(s"records/$target.txt")
     val lines = Source.fromFile(balanceFile).getLines()
-    val transactions = lines.map{line =>
+    lines.map{line =>
       val split = line.split(";:;")
       Transaction(split(0).toDouble, split(1))
     }
-
-    transactions.foldLeft(0.0){case(sum, transaction) => sum + transaction.amount}
   }
 
   def getAllBalanceNames: Array[String] = {
