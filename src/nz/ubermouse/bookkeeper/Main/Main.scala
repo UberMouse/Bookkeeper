@@ -29,7 +29,10 @@ object Main extends App {
   }
 
   def balances(args: Array[String]): Unit = {
+    val balanceNames = getAllBalanceNames
+    val balancesWithName = balanceNames.map(name => (name, calculateBalance(name)))
 
+    balancesWithName.foreach{case(name, balance) => println(s"$name: $balance")}
   }
 
   def add(args: Array[String]): Unit = {
@@ -57,5 +60,12 @@ object Main extends App {
     }
 
     transactions.foldLeft(0.0){case(sum, transaction) => sum + transaction.amount}
+  }
+
+  def getAllBalanceNames: Array[String] = {
+    val balanceDirectory = new File("records")
+    val balances = balanceDirectory.listFiles()
+
+    balances.map(_.getName.split("\\.")(0))
   }
 }
