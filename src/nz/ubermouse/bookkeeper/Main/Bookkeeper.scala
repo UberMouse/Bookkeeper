@@ -4,8 +4,9 @@ import java.io.{PrintWriter, FileWriter, File}
 
 import scala.io.Source
 
-object Main extends App {
+object Bookkeeper extends App with LifecycleCallbacks {
   case class Transaction(amount: Double, description: String)
+  GitIntegration.integrate()
 
   val actions = Map(
     "add" -> add _,
@@ -15,7 +16,12 @@ object Main extends App {
     "transactions" -> transactions _
   )
 
-  actions(args.head)(args.drop(1))
+  val actionName = args.head
+  val actionArguments = args.drop(1)
+
+  executeCallbacks(actionArguments, actionName, Before())
+  actions(actionName)(actionArguments)
+  executeCallbacks(actionArguments, actionName, After())
 
   def create(args: Array[String]): Unit = {
     val name = args.head
