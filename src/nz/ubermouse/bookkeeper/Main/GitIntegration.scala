@@ -6,16 +6,16 @@ import sys.process._
 
 object GitIntegration {
   def integrate() {
-    Bookkeeper.after("add", postAdd)
-    Bookkeeper.after("create", postCreate)
+    Bookkeeper.after("add", createCommitForTransaction)
+    Bookkeeper.after("create", createCommitForNewAccount)
   }
 
-  def postAdd(args: Array[String]): Unit = {
+  def createCommitForTransaction(args: Array[String]): Unit = {
     val message = s"Transaction: Balance of account ${args.head} changed by ${args(1)}"
     commit(message)
   }
 
-  def postCreate(args: Array[String]): Unit = {
+  def createCommitForNewAccount(args: Array[String]): Unit = {
     val message = s"New account created: ${args.head}"
 
     addUntrackedFiles
@@ -28,7 +28,8 @@ object GitIntegration {
   }
 
   private def commit(message: String) = {
-    println(Process(Seq("git", "commit", "-am", message), gitRoot) !)
+    val command = Process(Seq("git", "commit", "-am", message), gitRoot)
+    println(command !)
   }
 
   private def addUntrackedFiles: Unit = {
