@@ -9,7 +9,8 @@ object Bookkeeper extends App with LifecycleCallbacks {
   GitIntegration.integrate()
 
   val actions = Map(
-    "add" -> add _,
+    "credit" -> credit _,
+    "debit" -> debit _,
     "create" -> create _,
     "balance" -> balance _,
     "balances" -> balances _,
@@ -44,18 +45,21 @@ object Bookkeeper extends App with LifecycleCallbacks {
     balancesWithName.foreach{case(name, balance) => println(s"$name: $balance")}
   }
 
-  def add(args: Array[String]): Unit = {
+  def debit(args: Array[String]): Unit = {
     val target = args.head
     val amount = args(1)
     val description = args.drop(2).mkString(" ")
 
-    val balanceFile = new File(s"records/$target.txt")
-    if(!balanceFile.exists())
-      throw new Exception("Supplied target does not exist")
+    addTransactionForTarget(target, amount, description)
+  }
 
-    val writer = new FileWriter(balanceFile, true)
-    writer.write(List(amount, description).mkString(";:;") + System.lineSeparator())
-    writer.close()
+  def credit(args: Array[String]): Unit = {
+    val target = args.head
+    val amount = args(1)
+    val description = args.drop(2).mkString(" ")
+
+    val amountWithMinus = if(amount.indexOf('-') == -1) s"-$amount" else amount
+    addTransactionForTarget(target, amountWithMinus, description)
   }
 
   def transactions(args: Array[String]): Unit = {
@@ -88,5 +92,16 @@ object Bookkeeper extends App with LifecycleCallbacks {
     val balances = balanceDirectory.listFiles()
 
     balances.map(_.getName.split("\\.")(0))
+  }
+
+  def addTransactionForTarget(target: String, amount: String, description: String) = {
+    val balanceFile = new File(s"records/$target.txt")
+    if(!balanceFile.exists())
+      throw new Exception("Supplied target does not exist")
+
+    val descriptionWithDefault = if(description.isEmpty) "N/A" else description
+    val writer = new FileWriter(balanceFile, true)
+    writer.write(List(amount, descriptionWithDefault).mkString(";:;") + System.lineSeparator())
+    writer.close()
   }
 }
