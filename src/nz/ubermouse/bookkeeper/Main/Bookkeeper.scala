@@ -25,6 +25,7 @@ object Bookkeeper extends App with LifecycleCallbacks {
   executeCallbacks(actionArguments, actionName, After())
 
   def create(args: Array[String]): Unit = {
+    assert(args.length == 1, "Only one argument can be passed")
     val name = args.head
 
     val balanceFile = new File(s"records/$name.txt")
@@ -33,6 +34,7 @@ object Bookkeeper extends App with LifecycleCallbacks {
   }
 
   def balance(args: Array[String]): Unit = {
+    assert(args.length == 1, "Only one argument can be passed")
     val target = args.head
 
     println(s"Balance for $target is ${calculateBalance(target)}")
@@ -46,6 +48,7 @@ object Bookkeeper extends App with LifecycleCallbacks {
   }
 
   def debit(args: Array[String]): Unit = {
+    assert(args.length == 3, "Three arguments must be passed")
     val target = args.head
     val amount = args(1)
     val description = args.drop(2).mkString(" ")
@@ -54,6 +57,7 @@ object Bookkeeper extends App with LifecycleCallbacks {
   }
 
   def credit(args: Array[String]): Unit = {
+    assert(args.length == 3, "Three arguments must be passed")
     val target = args.head
     val amount = args(1)
     val description = args.drop(2).mkString(" ")
@@ -63,6 +67,7 @@ object Bookkeeper extends App with LifecycleCallbacks {
   }
 
   def transactions(args: Array[String]): Unit = {
+    assert(args.length == 1, "Only one argument can be passed")
     val target = args.head
     val limit = if(args.length > 1) args(1).toInt else 10
 
