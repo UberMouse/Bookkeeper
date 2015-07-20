@@ -48,7 +48,7 @@ object Bookkeeper extends App with LifecycleCallbacks {
   }
 
   def debit(args: Array[String]): Unit = {
-    assert(args.length == 3, "Three arguments must be passed")
+    assert(args.length == 2, "Two arguments must be passed")
     val target = args.head
     val amount = args(1)
     val description = args.drop(2).mkString(" ")
@@ -57,7 +57,7 @@ object Bookkeeper extends App with LifecycleCallbacks {
   }
 
   def credit(args: Array[String]): Unit = {
-    assert(args.length == 3, "Three arguments must be passed")
+    assert(args.length == 2, "Two arguments must be passed")
     val target = args.head
     val amount = args(1)
     val description = args.drop(2).mkString(" ")
@@ -86,7 +86,7 @@ object Bookkeeper extends App with LifecycleCallbacks {
 
     val balanceFile = new File(s"records/$target.txt")
     val lines = Source.fromFile(balanceFile).getLines()
-    lines.map{line =>
+    lines.filter(_.length != 0).map{line =>
       val split = line.split(";:;")
       Transaction(split(0).toDouble, split(1))
     }
@@ -94,7 +94,7 @@ object Bookkeeper extends App with LifecycleCallbacks {
 
   def getAllBalanceNames: Array[String] = {
     val balanceDirectory = new File("records")
-    val balances = balanceDirectory.listFiles()
+    val balances = balanceDirectory.listFiles().filter(_.isFile)
 
     balances.map(_.getName.split("\\.")(0))
   }
